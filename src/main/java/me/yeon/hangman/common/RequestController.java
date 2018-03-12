@@ -1,6 +1,7 @@
 package me.yeon.hangman.common;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.TimeZone;
@@ -74,11 +75,9 @@ public class RequestController {
 	@RequestMapping(value="report", method=RequestMethod.GET)
 	public @ResponseBody Result showResult(String id)
 	{
-		HashMap<String,ResultEntry> hm = gm.showReport(id);
+		ArrayList<ResultEntry> hm = gm.showReport(id);
 		if(hm == null){
 			return new Result("error","report-not available",null);
-		}else if(hm.size() == 1 && hm.containsKey("wait")){
-			return new Result("wait","report-wait",null);
 		}else{
 			return new Result("ok","report",hm);
 		}

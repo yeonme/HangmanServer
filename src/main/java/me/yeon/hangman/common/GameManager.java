@@ -1,8 +1,10 @@
 package me.yeon.hangman.common;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -69,23 +71,24 @@ public class GameManager {
 	
 	public boolean processAnswer(ResultEntry resp){
 		String id = resp.getId();
-		if(!users.contains(id) || reports.containsKey(id) || lastWord == null){
+		if(!users.contains(new User(id)) || reports.containsKey(id) || lastWord == null){
 			//출제 상태 아님, 로그인한 적 없는 유저, 기 제출된 유저
 			return false;
 		}
 		int uidx = users.indexOf(new User(id));
 		User u = users.get(uidx);
+		resp.setName(u.getName());
 		//문제 시작 시간보다 늦은 로그인 시간이라면 부분 시간 풀기로 표시
 		resp.setPartial(lastWord.getBeginDate().before(u.getLoginTime()));
 		u.setAnswerTime(Calendar.getInstance());
-		resp.setMs(Calendar.getInstance().get(Calendar.MILLISECOND));
-		reports.put(id, resp);
+		resp.setMs(Math.toIntExact(Calendar.getInstance().getTimeInMillis()-lastWord.getBeginDate().getTimeInMillis()));
+		reports.put(id,resp);
 		System.out.println("processAnswer 등록됨: "+resp.getName());
 		return true;
 	}
 	
-	public HashMap<String,ResultEntry> showReport(String uid){
-		if(!users.contains(new User(uid))){
+	public ArrayList<ResultEntry> showReport(String uid){
+		/*if(!users.contains(new User(uid))){
 			//요청한 사람은 로그인 상태가 아니다
 			return null;
 		}else if(lastWord == null || reports == null ||
@@ -94,12 +97,16 @@ public class GameManager {
 			//성적 표기 기한을 지났으면 표시할 수 없다
 			return null;
 		}
-		if(lastWord.getDueDate().before(Calendar.getInstance())){
+		if(lastWord.getDueDate().after(Calendar.getInstance())){
 			HashMap<String,ResultEntry> alResult = new HashMap<>();
 			//아직 문제풀이가 끝나지 않았으므로, delayReport가 필요하다.
 			alResult.put("wait",null);
 			return alResult;
+		}*/
+		ArrayList<ResultEntry> hs = new ArrayList<>();
+		for(Map.Entry<String, ResultEntry> kv : reports.entrySet()){
+			hs.add(kv.getValue());
 		}
-		return reports;
+		return hs;
 	}
 }
